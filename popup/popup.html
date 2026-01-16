@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steel - Standup Wheel</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1>Steel</h1>
+      <span class="popup-subtitle">Standup Wheel</span>
+    </header>
+    
+    <div class="popup-status" id="status">
+      Checking page...
+    </div>
+    
+    <div class="popup-content" id="content" style="display: none;">
+      <div class="popup-section">
+        <label for="names-input">Team Members (master list)</label>
+        <textarea 
+          id="names-input" 
+          placeholder="Enter names, one per line..."
+          rows="6"
+        ></textarea>
+        <div class="popup-hint">Add/remove team members here. Toggle in widget.</div>
+      </div>
+      
+      <div class="popup-actions">
+        <button id="save-btn" class="btn btn-primary">Save</button>
+        <button id="reset-btn" class="btn btn-secondary">Reset</button>
+        <button id="open-wheel-btn" class="btn btn-accent">Open</button>
+      </div>
+      
+      <div class="popup-shortcut">
+        <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>
+      </div>
+    </div>
+    
+    <div class="popup-not-jira" id="not-jira" style="display: none;">
+      <div class="not-jira-icon">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </div>
+      <p>Navigate to a Jira board to use Steel</p>
+      <div class="supported-urls">
+        <strong>Supported URLs:</strong>
+        <ul>
+          <li>Jira Cloud boards</li>
+          <li>Jira Server RapidBoard</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <script src="../browser-polyfill.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

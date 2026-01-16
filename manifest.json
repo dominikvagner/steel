@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "Steel - Standup Wheel",
+  "version": "1.0.0",
+  "description": "A spinning wheel for randomly selecting team members during standups. Works with Jira boards.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.atlassian.net/*",
+    "*://*/jira/*",
+    "*://*/secure/RapidBoard.jspa*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.atlassian.net/jira/software/projects/*/boards/*",
+        "*://*.atlassian.net/jira/software/c/projects/*/boards/*",
+        "*://*/secure/RapidBoard.jspa*",
+        "*://*/jira/software/projects/*/boards/*"
+      ],
+      "js": [
+        "browser-polyfill.min.js",
+        "content/wheel.js",
+        "content/overlay.js",
+        "content/content.js"
+      ],
+      "css": [
+        "content/content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "commands": {
+    "toggle-wheel": {
+      "suggested_key": {
+        "default": "Alt+Shift+W",
+        "mac": "MacCtrl+Shift+W"
+      },
+      "description": "Toggle the Steel wheel"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "steel@standup-wheel.extension",
+      "strict_min_version": "109.0"
+    }
+  }
+}

@@ -1,0 +1,226 @@
+/* Steel - Popup Styles */
+/* Simplified: dark grey, white borders, square, monospace */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: monospace;
+  font-size: 14px;
+  color: #fff;
+  background: #222;
+  min-width: 300px;
+}
+
+.popup-container {
+  padding: 16px;
+}
+
+/* Header */
+.popup-header {
+  text-align: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #fff;
+}
+
+.popup-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.popup-subtitle {
+  font-size: 12px;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Status */
+.popup-status {
+  text-align: center;
+  padding: 20px;
+  color: #aaa;
+}
+
+/* Content section */
+.popup-section {
+  margin-bottom: 12px;
+}
+
+.popup-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #fff;
+}
+
+.popup-section textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #fff;
+  border-radius: 0;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+  font-family: monospace;
+  resize: vertical;
+}
+
+.popup-section textarea:focus {
+  outline: none;
+  background: #3a3a3a;
+}
+
+.popup-section textarea::placeholder {
+  color: #888;
+}
+
+.popup-hint {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Stats */
+.popup-stats {
+  text-align: center;
+  padding: 8px;
+  background: #333;
+  border: 2px solid #fff;
+  font-size: 13px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.popup-stats.empty {
+  color: #888;
+}
+
+.popup-stats.warning {
+  color: #ffcc00;
+}
+
+/* Actions */
+.popup-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.popup-divider {
+  height: 2px;
+  background: #fff;
+  margin: 16px 0;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: 0;
+  border: 2px solid #fff;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: monospace;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn:hover {
+  background: #444;
+}
+
+.btn:active {
+  background: #222;
+}
+
+.btn-primary {
+  background: #333;
+  color: white;
+}
+
+.btn-secondary {
+  background: #333;
+  color: #fff;
+}
+
+.btn-accent {
+  background: #333;
+  color: white;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn.success {
+  background: #444 !important;
+  color: #0f0;
+}
+
+/* Keyboard shortcut display */
+.popup-shortcut {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #888;
+}
+
+.popup-shortcut kbd {
+  display: inline-block;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-family: monospace;
+  background: #333;
+  border: 1px solid #fff;
+  color: #fff;
+}
+
+/* Not on Jira page */
+.popup-not-jira {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.not-jira-icon {
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.popup-not-jira p {
+  color: #aaa;
+  margin-bottom: 16px;
+}
+
+.supported-urls {
+  text-align: left;
+  background: #333;
+  border: 2px solid #fff;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.supported-urls strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.supported-urls ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #aaa;
+}
+
+.supported-urls li {
+  margin: 4px 0;
+}

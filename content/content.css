@@ -1,0 +1,184 @@
+/* Steel - Content Styles */
+/* Compact: dark grey, white borders, square, monospace */
+
+/* Floating trigger button - bottom right, small */
+.steel-trigger-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 0;
+  border: 2px solid #fff;
+  background: #333;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999998;
+  font-family: monospace;
+  padding: 0;
+}
+
+.steel-trigger-btn:hover {
+  background: #444;
+}
+
+.steel-trigger-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Overlay - transparent background, positioned bottom-left */
+.steel-overlay {
+  position: fixed;
+  bottom: 8px;
+  left: 16px;
+  z-index: 999999;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+/* Container for wheel and controls */
+.steel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Wheel container */
+.steel-wheel-container {
+  position: relative;
+  margin-bottom: -5px;
+}
+
+.steel-wheel-canvas {
+  cursor: pointer;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.steel-wheel-canvas:focus {
+  outline: none;
+}
+
+/* Result display - compact */
+.steel-result {
+  background: #333;
+  border: 2px solid #fff;
+  padding: 6px 16px;
+  text-align: center;
+}
+
+.steel-result-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Controls - two row grid */
+.steel-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 210px;
+}
+
+.steel-controls-row {
+  display: flex;
+  gap: 2px;
+}
+
+.steel-controls-row:first-child .steel-btn {
+  flex: 1;
+}
+
+.steel-controls-row:last-child .steel-btn {
+  flex: 1;
+}
+
+.steel-btn {
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 2px solid #fff;
+  background: #333;
+  color: #fff;
+  font-size: 11px;
+  font-family: monospace;
+  cursor: pointer;
+  text-align: center;
+}
+
+.steel-btn:hover:not(:disabled) {
+  background: #444;
+}
+
+.steel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Editor - compact */
+.steel-editor {
+  background: #333;
+  border: 2px solid #fff;
+  padding: 6px;
+  width: 210px;
+}
+
+.steel-names-list {
+  margin-bottom: 4px;
+}
+
+.steel-name-item {
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 11px;
+  border-bottom: 1px solid #444;
+}
+
+.steel-name-item:last-child {
+  border-bottom: none;
+}
+
+.steel-name-item:hover {
+  background: #444;
+}
+
+.steel-name-item.steel-name-disabled {
+  text-decoration: line-through;
+  color: #666;
+}
+
+.steel-editor-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.steel-editor-controls .steel-btn {
+  flex: 1;
+}
+
+/* Status text - compact */
+.steel-status {
+  color: #888;
+  font-size: 10px;
+  text-align: center;
+}
+
+/* Notification toast */
+.steel-notification {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  border: 2px solid #fff;
+  color: white;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-family: monospace;
+  z-index: 1000000;
+}
