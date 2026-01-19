@@ -13,7 +13,7 @@ class SteelWheel {
     this.rotation = 0;
     this.isSpinning = false;
     this.spinStartTime = null;
-    this.spinDuration = 4500; // 4.5 seconds
+    this.spinDuration = 2500; // 2.5 seconds
     this.targetRotation = 0;
     
     // Vibrant colors with good white text contrast
