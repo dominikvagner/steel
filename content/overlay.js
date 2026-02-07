@@ -13,6 +13,7 @@ class SteelOverlay {
     this.names = [];
     this.activeNames = [];
     this.lastWinner = null;
+    this.pendingRemoval = null;
     this.isEditing = false;
   }
   
@@ -22,11 +23,12 @@ class SteelOverlay {
     
     try {
       const result = await browser.storage.local.get(storageKey);
-      const boardData = result[storageKey] || { names: [], activeNames: [], lastWinner: null };
+      const boardData = result[storageKey] || { names: [], activeNames: [], lastWinner: null, pendingRemoval: null };
       
       this.names = boardData.names || [];
       this.activeNames = boardData.activeNames || [...this.names];
       this.lastWinner = boardData.lastWinner || null;
+      this.pendingRemoval = boardData.pendingRemoval || null;
       
       // If activeNames is empty but names exist, reset
       if (this.activeNames.length === 0 && this.names.length > 0) {
@@ -38,6 +40,7 @@ class SteelOverlay {
       this.names = [];
       this.activeNames = [];
       this.lastWinner = null;
+      this.pendingRemoval = null;
     }
   }
   
@@ -50,7 +53,8 @@ class SteelOverlay {
         [storageKey]: {
           names: this.names,
           activeNames: this.activeNames,
-          lastWinner: this.lastWinner
+          lastWinner: this.lastWinner,
+          pendingRemoval: this.pendingRemoval
         }
       });
     } catch (error) {
@@ -153,6 +157,11 @@ class SteelOverlay {
       resultName.textContent = this.lastWinner;
     }
     
+    // Restore highlight if pending removal exists
+    if (this.pendingRemoval && this.wheel) {
+      this.wheel.setHighlight(this.pendingRemoval);
+    }
+    
     this.bindEvents();
     this.updateUI();
   }
@@ -169,7 +178,8 @@ class SteelOverlay {
     });
     
     // Spin button
-    this.overlay.querySelector('.steel-spin-btn').addEventListener('click', () => {
+    this.overlay.querySelector('.steel-spin-btn').addEventListener('click', async () => {
+      await this.removePendingWinner();
       if (this.wheel) this.wheel.spin();
     });
     
@@ -260,9 +270,11 @@ class SteelOverlay {
   async resetList() {
     this.activeNames = [...this.names];
     this.lastWinner = null;
+    this.pendingRemoval = null;
     await this.saveNames();
     
     if (this.wheel) {
+      this.wheel.setHighlight(null);
       this.wheel.setNames(this.activeNames);
     }
     
@@ -283,22 +295,37 @@ class SteelOverlay {
     result.style.display = 'block';
     resultName.textContent = winner;
     
-    // Save last winner
+    // Save last winner and mark for pending removal (don't remove yet)
     this.lastWinner = winner;
-    
-    // Remove winner from active list
-    this.activeNames = this.activeNames.filter(name => name !== winner);
+    this.pendingRemoval = winner;
     await this.saveNames();
     
-    // Update wheel with remaining names
+    // Highlight the winner on the wheel
     if (this.wheel) {
-      this.wheel.setNames(this.activeNames);
+      this.wheel.setHighlight(winner);
     }
     
     this.updateUI();
     
     // Notify parent to click the filter
     this.onWinnerSelected(winner);
+  }
+  
+  async removePendingWinner() {
+    if (!this.pendingRemoval) return;
+    
+    // Remove pending winner from active list
+    this.activeNames = this.activeNames.filter(name => name !== this.pendingRemoval);
+    this.pendingRemoval = null;
+    await this.saveNames();
+    
+    // Update wheel and clear highlight
+    if (this.wheel) {
+      this.wheel.setHighlight(null);
+      this.wheel.setNames(this.activeNames);
+    }
+    
+    this.updateUI();
   }
   
   destroy() {

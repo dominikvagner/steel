@@ -15,6 +15,7 @@ class SteelWheel {
     this.spinStartTime = null;
     this.spinDuration = 2500; // 2.5 seconds
     this.targetRotation = 0;
+    this.highlightName = null;
     
     // Vibrant colors with good white text contrast
     this.colors = [
@@ -63,6 +64,11 @@ class SteelWheel {
     this.render();
   }
   
+  setHighlight(name) {
+    this.highlightName = name;
+    this.render();
+  }
+  
   render() {
     const ctx = this.ctx;
     const centerX = this.size / 2;
@@ -94,8 +100,14 @@ class SteelWheel {
       
       // Draw border only if more than one segment
       if (this.names.length > 1) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
+        // Use brighter border for highlighted segment
+        if (this.highlightName && name === this.highlightName) {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.lineWidth = 2;
+        } else {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 1;
+        }
         ctx.stroke();
       }
     });
