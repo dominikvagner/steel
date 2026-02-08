@@ -11,7 +11,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const openWheelBtn = document.getElementById("open-wheel-btn");
 
   let currentBoardId = null;
-  let boardData = { names: [], activeNames: [] };
+  let boardData = {
+    names: [],
+    activeNames: [],
+    lastWinner: null,
+    pendingRemoval: null,
+    colorRotation: 0,
+  };
 
   // Check if we're on a Jira board
   async function checkCurrentPage() {
@@ -40,7 +46,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const storageKey = `board:${currentBoardId}`;
     try {
       const result = await browser.storage.local.get(storageKey);
-      boardData = result[storageKey] || { names: [], activeNames: [] };
+      boardData = result[storageKey] || {
+        names: [],
+        activeNames: [],
+        lastWinner: null,
+        pendingRemoval: null,
+        colorRotation: 0,
+      };
+      boardData.lastWinner =
+        typeof boardData.lastWinner === "string" ? boardData.lastWinner : null;
+      boardData.pendingRemoval =
+        typeof boardData.pendingRemoval === "string"
+          ? boardData.pendingRemoval
+          : null;
+      boardData.colorRotation = Number.isInteger(boardData.colorRotation)
+        ? boardData.colorRotation
+        : 0;
 
       namesInput.value = boardData.names.join("\n");
     } catch (error) {

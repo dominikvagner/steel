@@ -14,7 +14,66 @@ class SteelOverlay {
     this.activeNames = [];
     this.lastWinner = null;
     this.pendingRemoval = null;
+    this.colorRotation = 0;
+    this.nameColors = {};
     this.isEditing = false;
+  }
+
+  getDefaultPalette() {
+    return [
+      "#E53935", // Red
+      "#D81B60", // Pink
+      "#8E24AA", // Purple
+      "#5E35B1", // Deep purple
+      "#3949AB", // Indigo
+      "#1E88E5", // Blue
+      "#039BE5", // Light blue (darker)
+      "#00ACC1", // Cyan (darker)
+      "#00897B", // Teal
+      "#43A047", // Green
+      "#7CB342", // Light green (darker)
+      "#C0CA33", // Lime (darker)
+      "#9E9D24", // Olive
+      "#F9A825", // Amber (darker)
+      "#FB8C00", // Orange
+      "#F4511E", // Deep orange
+      "#6D4C41", // Brown
+      "#8D6E63", // Light brown
+      "#546E7A", // Blue grey
+      "#455A64", // Dark blue grey
+    ];
+  }
+
+  getPalette() {
+    if (this.wheel && Array.isArray(this.wheel.colors)) {
+      return this.wheel.colors;
+    }
+
+    return this.getDefaultPalette();
+  }
+
+  updateNameColors() {
+    const palette = this.getPalette();
+    if (palette.length === 0 || this.names.length === 0) {
+      this.nameColors = {};
+      if (this.wheel) {
+        this.wheel.setNameColors(this.nameColors);
+      }
+      return;
+    }
+
+    const trimmedLength = Math.min(palette.length, this.names.length);
+    const trimmedPalette = palette.slice(0, trimmedLength);
+
+    this.nameColors = {};
+    this.names.forEach((name, index) => {
+      const colorIndex = (index + this.colorRotation) % trimmedPalette.length;
+      this.nameColors[name] = trimmedPalette[colorIndex];
+    });
+
+    if (this.wheel) {
+      this.wheel.setNameColors(this.nameColors);
+    }
   }
 
   async loadNames() {
@@ -28,16 +87,26 @@ class SteelOverlay {
         activeNames: [],
         lastWinner: null,
         pendingRemoval: null,
+        colorRotation: 0,
       };
 
       this.names = boardData.names || [];
       this.activeNames = boardData.activeNames || [...this.names];
       this.lastWinner = boardData.lastWinner || null;
       this.pendingRemoval = boardData.pendingRemoval || null;
+      this.colorRotation = Number.isInteger(boardData.colorRotation)
+        ? boardData.colorRotation
+        : 0;
 
       // If activeNames is empty but names exist, reset
       if (this.activeNames.length === 0 && this.names.length > 0) {
         this.activeNames = [...this.names];
+        const paletteLength = Math.min(
+          this.getPalette().length || 1,
+          this.names.length,
+        );
+        this.colorRotation =
+          (this.colorRotation + 1) % (paletteLength || 1);
         await this.saveNames();
       }
     } catch (error) {
@@ -46,6 +115,8 @@ class SteelOverlay {
       this.activeNames = [];
       this.lastWinner = null;
       this.pendingRemoval = null;
+      this.colorRotation = 0;
+      this.nameColors = {};
     }
   }
 
@@ -60,6 +131,7 @@ class SteelOverlay {
           activeNames: this.activeNames,
           lastWinner: this.lastWinner,
           pendingRemoval: this.pendingRemoval,
+          colorRotation: this.colorRotation,
         },
       });
     } catch (error) {
@@ -153,6 +225,7 @@ class SteelOverlay {
     });
 
     this.bindEvents();
+    this.updateNameColors();
     this.refreshOverlayState();
   }
 
@@ -160,6 +233,7 @@ class SteelOverlay {
     if (!this.overlay) return;
 
     if (this.wheel) {
+      this.updateNameColors();
       this.wheel.setNames(this.activeNames);
       this.wheel.setHighlight(this.pendingRemoval || null);
     }
@@ -302,9 +376,15 @@ class SteelOverlay {
     this.activeNames = [...this.names];
     this.lastWinner = null;
     this.pendingRemoval = null;
+    const paletteLength = Math.min(
+      this.getPalette().length || 1,
+      this.names.length,
+    );
+    this.colorRotation = (this.colorRotation + 1) % (paletteLength || 1);
     await this.saveNames();
 
     if (this.wheel) {
+      this.updateNameColors();
       this.wheel.setHighlight(null);
       this.wheel.setNames(this.activeNames);
     }

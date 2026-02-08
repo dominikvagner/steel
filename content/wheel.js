@@ -16,21 +16,30 @@ class SteelWheel {
     this.spinDuration = 2500; // 2.5 seconds
     this.targetRotation = 0;
     this.highlightName = null;
+    this.nameColors = {};
 
     // Vibrant colors with good white text contrast
     this.colors = [
       "#E53935", // Red
+      "#D81B60", // Pink
       "#8E24AA", // Purple
+      "#5E35B1", // Deep purple
       "#3949AB", // Indigo
+      "#1E88E5", // Blue
+      "#039BE5", // Light blue (darker)
+      "#00ACC1", // Cyan (darker)
       "#00897B", // Teal
       "#43A047", // Green
-      "#F4511E", // Deep orange
-      "#6D4C41", // Brown
-      "#5E35B1", // Deep purple
-      "#1E88E5", // Blue
-      "#00ACC1", // Cyan (darker)
       "#7CB342", // Light green (darker)
       "#C0CA33", // Lime (darker)
+      "#9E9D24", // Olive
+      "#F9A825", // Amber (darker)
+      "#FB8C00", // Orange
+      "#F4511E", // Deep orange
+      "#6D4C41", // Brown
+      "#8D6E63", // Light brown
+      "#546E7A", // Blue grey
+      "#455A64", // Dark blue grey
     ];
 
     this.init();
@@ -61,6 +70,11 @@ class SteelWheel {
 
   setNames(names) {
     this.names = names;
+    this.render();
+  }
+
+  setNameColors(nameColors) {
+    this.nameColors = nameColors || {};
     this.render();
   }
 
@@ -95,7 +109,8 @@ class SteelWheel {
       ctx.moveTo(centerX, centerY);
       ctx.arc(centerX, centerY, radius, startAngle, endAngle);
       ctx.closePath();
-      ctx.fillStyle = this.colors[index % this.colors.length];
+      ctx.fillStyle =
+        this.nameColors[name] || this.colors[index % this.colors.length];
       ctx.fill();
 
       // Draw border only if more than one segment
