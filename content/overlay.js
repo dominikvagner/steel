@@ -71,7 +71,12 @@ class SteelOverlay {
     if (this.isVisible) return;
 
     await this.loadNames();
-    this.createOverlay();
+    if (!this.overlay) {
+      this.createOverlay();
+    } else {
+      this.overlay.style.display = "block";
+      this.refreshOverlayState();
+    }
     this.isVisible = true;
 
     // Hide the trigger button
@@ -88,16 +93,9 @@ class SteelOverlay {
   hide() {
     if (!this.isVisible) return;
 
-    if (this.wheel) {
-      this.wheel.destroy();
-      this.wheel = null;
+    if (this.overlay) {
+      this.overlay.style.display = "none";
     }
-
-    if (this.overlay && this.overlay.parentNode) {
-      this.overlay.parentNode.removeChild(this.overlay);
-    }
-
-    this.overlay = null;
     this.isVisible = false;
 
     // Show the trigger button
@@ -154,20 +152,33 @@ class SteelOverlay {
       onSpinEnd: (winner, index) => this.handleSpinEnd(winner, index),
     });
 
-    // Show last winner if exists
+    this.bindEvents();
+    this.refreshOverlayState();
+  }
+
+  refreshOverlayState() {
+    if (!this.overlay) return;
+
+    if (this.wheel) {
+      this.wheel.setNames(this.activeNames);
+      this.wheel.setHighlight(this.pendingRemoval || null);
+    }
+
+    const result = this.overlay.querySelector(".steel-result");
+    const resultName = this.overlay.querySelector(".steel-result-name");
     if (this.lastWinner) {
-      const result = this.overlay.querySelector(".steel-result");
-      const resultName = this.overlay.querySelector(".steel-result-name");
       result.style.display = "block";
       resultName.textContent = this.lastWinner;
+    } else {
+      result.style.display = "none";
     }
 
-    // Restore highlight if pending removal exists
-    if (this.pendingRemoval && this.wheel) {
-      this.wheel.setHighlight(this.pendingRemoval);
-    }
+    this.isEditing = false;
+    const editor = this.overlay.querySelector(".steel-editor");
+    const controls = this.overlay.querySelector(".steel-controls");
+    editor.style.display = "none";
+    controls.style.display = "flex";
 
-    this.bindEvents();
     this.updateUI();
   }
 
