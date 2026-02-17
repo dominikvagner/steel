@@ -43,22 +43,68 @@
     );
   }
 
-  function getFilterButtons() {
-    return Array.from(
-      document.querySelectorAll("a.js-quickfilter-button.aui-button-link"),
-    ).filter(isFilterButtonVisible);
-  }
+  // --- Jira Cloud filters (checkbox-based) ---
+  function getCloudFilters() {
+    const fieldset = document.querySelector(
+      'fieldset[data-testid="software-filters.ui.filter-selection-bar.filter-selection-bar"]',
+    );
+    if (!fieldset) return [];
 
-  async function waitForFilterButtons(timeoutMs = 1200, intervalMs = 100) {
-    const start = Date.now();
-    let buttons = getFilterButtons();
+    const items = [];
+    const wrappers = fieldset.querySelectorAll('div[role="presentation"]');
 
-    while (buttons.length === 0 && Date.now() - start < timeoutMs) {
-      await delay(intervalMs);
-      buttons = getFilterButtons();
+    for (const wrapper of wrappers) {
+      const checkbox = wrapper.querySelector('input[type="checkbox"]');
+      if (!checkbox) continue;
+
+      const label = wrapper.querySelector('label');
+      if (!label) continue;
+
+      const rawName = label.textContent.trim();
+      if (!rawName) continue;
+
+      items.push({
+        name: normalizeFilterText(rawName),
+        element: label,
+        isActive: () => checkbox.checked,
+        click: () => label.click(),
+      });
     }
 
-    return buttons;
+    return items.filter((item) => isFilterButtonVisible(item.element));
+  }
+
+  // --- Jira Server filters (anchor-button-based) ---
+  function getServerFilters() {
+    return Array.from(
+      document.querySelectorAll("a.js-quickfilter-button.aui-button-link"),
+    )
+      .filter(isFilterButtonVisible)
+      .map((btn) => ({
+        name: normalizeFilterText(btn.textContent),
+        element: btn,
+        isActive: () => btn.getAttribute("aria-pressed") === "true",
+        click: () => btn.click(),
+      }));
+  }
+
+  // Returns normalized filter objects for whichever Jira variant is detected
+  function getFilters() {
+    const cloud = getCloudFilters();
+    if (cloud.length > 0) return cloud;
+    return getServerFilters();
+  }
+
+  async function waitForFilters(timeoutMs = 1200, intervalMs = 100) {
+    const start = Date.now();
+    let filters = getFilters();
+
+    while (filters.length === 0 && Date.now() - start < timeoutMs) {
+      await delay(intervalMs);
+      filters = getFilters();
+    }
+
+    return filters;
   }
 
   async function waitForFilterStability(timeoutMs = 1200, idleMs = 200) {
@@ -85,69 +131,54 @@
     });
   }
 
-  async function attemptFilterClick(button, normalizedName) {
-    if (!button || !button.isConnected) return false;
+  async function attemptFilterClick(filter, normalizedName) {
+    if (!filter || !filter.element.isConnected) return false;
 
     try {
-      button.scrollIntoView({ block: "center", inline: "center" });
+      filter.element.scrollIntoView({ block: "center", inline: "center" });
     } catch (error) {
       // Some Jira layouts can throw on scrollIntoView; ignore.
     }
 
     try {
-      button.focus();
+      filter.element.focus();
     } catch (error) {
       // Some Jira layouts can throw on focus; ignore.
     }
 
-    button.click();
+    filter.click();
     await delay(180);
 
-    const refreshedButton = getFilterButtons().find((btn) => {
-      const buttonText = normalizeFilterText(btn.textContent);
-      return buttonText === normalizedName;
-    });
-
-    if (
-      !refreshedButton ||
-      refreshedButton.getAttribute("aria-pressed") !== "true"
-    ) {
+    const refreshed = getFilters().find((f) => f.name === normalizedName);
+    if (!refreshed || !refreshed.isActive()) {
       return false;
     }
 
     await delay(250);
 
-    const stableButton = getFilterButtons().find((btn) => {
-      const buttonText = normalizeFilterText(btn.textContent);
-      return buttonText === normalizedName;
-    });
-
-    return Boolean(
-      stableButton && stableButton.getAttribute("aria-pressed") === "true",
-    );
+    const stable = getFilters().find((f) => f.name === normalizedName);
+    return Boolean(stable && stable.isActive());
   }
 
-  // Find and click Jira quick filter buttons
+  // Find and click Jira filter (works for both Server and Cloud)
   async function clickPersonFilter(name) {
     const normalizedName = normalizeFilterText(name);
     const maxAttempts = 2;
     let hasCleared = false;
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-      const filterButtons = await waitForFilterButtons(
-        attempt === 0 ? 800 : 1500,
-      );
+      const filters = await waitForFilters(attempt === 0 ? 800 : 1500);
 
-      if (filterButtons.length === 0) {
+      if (filters.length === 0) {
         await delay(150);
         continue;
       }
 
       if (!hasCleared) {
         // Deselect any currently selected filters once
-        filterButtons.forEach((btn) => {
-          if (btn.getAttribute("aria-pressed") === "true") {
-            btn.click();
+        filters.forEach((f) => {
+          if (f.isActive()) {
+            f.click();
           }
         });
         hasCleared = true;
@@ -157,20 +188,14 @@
       await waitForFilterStability(900, 200);
 
       // Re-query in case Jira re-rendered the filters
-      const freshButtons = getFilterButtons();
-      const matchingButton =
-        freshButtons.find((btn) => {
-          const buttonText = normalizeFilterText(btn.textContent);
-          return buttonText === normalizedName;
-        }) ||
-        freshButtons.find((btn) => {
-          const buttonText = normalizeFilterText(btn.textContent);
-          return buttonText.includes(normalizedName);
-        });
+      const freshFilters = getFilters();
+      const matchingFilter =
+        freshFilters.find((f) => f.name === normalizedName) ||
+        freshFilters.find((f) => f.name.includes(normalizedName));
 
-      if (matchingButton && matchingButton.isConnected) {
+      if (matchingFilter && matchingFilter.element.isConnected) {
         const clicked = await attemptFilterClick(
-          matchingButton,
+          matchingFilter,
           normalizedName,
         );
         if (clicked) {
