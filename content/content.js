@@ -51,16 +51,21 @@
     if (!fieldset) return [];
 
     const items = [];
-    const wrappers = fieldset.querySelectorAll('div[role="presentation"]');
 
-    for (const wrapper of wrappers) {
-      const checkbox = wrapper.querySelector('input[type="checkbox"]');
-      if (!checkbox) continue;
+    // Find all checkboxes with IDs matching the pattern checkbox-id-*
+    const checkboxes = fieldset.querySelectorAll('input[type="checkbox"][id^="checkbox-id-"]');
 
-      const label = wrapper.querySelector('label');
+    for (const checkbox of checkboxes) {
+      const checkboxId = checkbox.id;
+      if (!checkboxId) continue;
+
+      // Find the associated label using the for attribute
+      const label = fieldset.querySelector(`label[for="${checkboxId}"]`);
       if (!label) continue;
 
-      const rawName = label.textContent.trim();
+      // Extract text from label (look for span inside, fallback to textContent)
+      const span = label.querySelector('span');
+      const rawName = span ? span.textContent.trim() : label.textContent.trim();
       if (!rawName) continue;
 
       items.push({
