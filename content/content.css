@@ -57,24 +57,13 @@
 .steel-wheel-canvas {
   cursor: pointer;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  /* Optimize rendering for crisp canvas display */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .steel-wheel-canvas:focus {
   outline: none;
-}
-
-/* Result display - compact */
-.steel-result {
-  background: #333;
-  border: 2px solid #fff;
-  padding: 6px 16px;
-  text-align: center;
-}
-
-.steel-result-name {
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
 }
 
 /* Controls - two row grid */
@@ -119,6 +108,19 @@
   cursor: not-allowed;
 }
 
+.steel-spin-btn-winner {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.steel-spin-btn-placeholder {
+  color: #888 !important;
+}
+
 /* Editor - compact */
 .steel-editor {
   background: #333;
@@ -147,9 +149,14 @@
   background: #444;
 }
 
-.steel-name-item.steel-name-disabled {
-  text-decoration: line-through;
-  color: #666;
+.steel-name-item.steel-name-active {
+  background: #444;
+  font-weight: bold;
+}
+
+.steel-name-item.steel-name-active::before {
+  content: "✓ ";
+  color: #4caf50;
 }
 
 .steel-editor-controls {
