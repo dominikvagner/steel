@@ -200,7 +200,7 @@
         );
         if (clicked) {
           console.log(`Steel: Selected filter for "${name}"`);
-          showNotification(`Selected: ${name}`);
+          showNotification(`${name}, it's your turn!`);
           return true;
         }
       }
@@ -209,7 +209,7 @@
     }
 
     console.log(`Steel: Could not find filter button for "${name}"`);
-    showNotification(`Could not find filter for "${name}"`);
+    showNotification(`Couldn't find a filter for ${name}`);
     return false;
   }
 
