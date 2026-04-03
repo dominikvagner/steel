@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Steel - Standup Wheel",
   "version": "1.0.0",
-  "description": "A spinning wheel for randomly selecting team members during standups. Works with Jira boards.",
+  "description": "Make standups fun! Spin a colorful wheel to randomly pick team members on your Jira boards.",
   "permissions": [
     "storage",
     "activeTab"

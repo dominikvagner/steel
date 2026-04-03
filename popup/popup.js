@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     boardData.names = newNames;
     if (namesChanged) {
-      boardData.activeNames = [...newNames];
+      boardData.activeNames = [];
     }
 
     const storageKey = `board:${currentBoardId}`;
@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Show save confirmation
   function showSaveConfirmation() {
-    saveBtn.textContent = "OK!";
+    saveBtn.textContent = "Saved!";
     saveBtn.classList.add("success");
     setTimeout(() => {
       saveBtn.textContent = "Save";
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Show reset confirmation
   function showResetConfirmation() {
-    resetBtn.textContent = "OK!";
+    resetBtn.textContent = "Reset!";
     resetBtn.classList.add("success");
     setTimeout(() => {
       resetBtn.textContent = "Reset";
