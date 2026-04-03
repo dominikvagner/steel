@@ -62,13 +62,11 @@ class SteelOverlay {
       return;
     }
 
-    const trimmedLength = Math.min(palette.length, this.names.length);
-    const trimmedPalette = palette.slice(0, trimmedLength);
-
+    // Use full palette to prevent duplicate colors (unless more names than colors)
     this.nameColors = {};
     this.names.forEach((name, index) => {
-      const colorIndex = (index + this.colorRotation) % trimmedPalette.length;
-      this.nameColors[name] = trimmedPalette[colorIndex];
+      const colorIndex = (index + this.colorRotation) % palette.length;
+      this.nameColors[name] = palette[colorIndex];
     });
 
     if (this.wheel) {
@@ -91,24 +89,12 @@ class SteelOverlay {
       };
 
       this.names = boardData.names || [];
-      this.activeNames = boardData.activeNames || [...this.names];
+      this.activeNames = boardData.activeNames || [];
       this.lastWinner = boardData.lastWinner || null;
       this.pendingRemoval = boardData.pendingRemoval || null;
       this.colorRotation = Number.isInteger(boardData.colorRotation)
         ? boardData.colorRotation
         : 0;
-
-      // If activeNames is empty but names exist, reset
-      if (this.activeNames.length === 0 && this.names.length > 0) {
-        this.activeNames = [...this.names];
-        const paletteLength = Math.min(
-          this.getPalette().length || 1,
-          this.names.length,
-        );
-        this.colorRotation =
-          (this.colorRotation + 1) % (paletteLength || 1);
-        await this.saveNames();
-      }
     } catch (error) {
       console.error("Steel: Failed to load names:", error);
       this.names = [];
@@ -191,15 +177,12 @@ class SteelOverlay {
     this.overlay.innerHTML = `
       <div class="steel-container">
         <div class="steel-wheel-container"></div>
-        <div class="steel-result" style="display: none;">
-          <span class="steel-result-name"></span>
-        </div>
         <div class="steel-controls">
           <div class="steel-controls-row">
-            <button class="steel-btn steel-spin-btn">Spin</button>
+            <button class="steel-btn steel-spin-btn">Spin!</button>
           </div>
           <div class="steel-controls-row">
-            <button class="steel-btn steel-reset-btn">Reset</button>
+            <button class="steel-btn steel-reset-btn">Restart</button>
             <button class="steel-btn steel-edit-btn">Edit</button>
             <button class="steel-btn steel-close-btn">Close</button>
           </div>
@@ -207,7 +190,7 @@ class SteelOverlay {
         <div class="steel-editor" style="display: none;">
           <div class="steel-names-list"></div>
           <div class="steel-editor-controls">
-            <button class="steel-btn steel-done-btn">Done</button>
+            <button class="steel-btn steel-done-btn">Save</button>
           </div>
         </div>
         <div class="steel-status"></div>
@@ -221,6 +204,7 @@ class SteelOverlay {
     this.wheel = new SteelWheel(wheelContainer, {
       names: this.activeNames,
       size: 230,
+      onSpinStart: () => this.removePendingWinner(),
       onSpinEnd: (winner, index) => this.handleSpinEnd(winner, index),
     });
 
@@ -236,15 +220,6 @@ class SteelOverlay {
       this.updateNameColors();
       this.wheel.setNames(this.activeNames);
       this.wheel.setHighlight(this.pendingRemoval || null);
-    }
-
-    const result = this.overlay.querySelector(".steel-result");
-    const resultName = this.overlay.querySelector(".steel-result-name");
-    if (this.lastWinner) {
-      result.style.display = "block";
-      resultName.textContent = this.lastWinner;
-    } else {
-      result.style.display = "none";
     }
 
     this.isEditing = false;
@@ -272,12 +247,11 @@ class SteelOverlay {
       }),
     );
 
-    // Spin button
+    // Spin button (now only shows winner name, clicking advances to next spin)
     this.overlay
       .querySelector(".steel-spin-btn")
       .addEventListener("click", async () => {
         await this.removePendingWinner();
-        if (this.wheel) this.wheel.spin();
       });
 
     // Edit button
@@ -301,17 +275,43 @@ class SteelOverlay {
     const status = this.overlay.querySelector(".steel-status");
 
     if (this.activeNames.length === 0 && this.names.length > 0) {
+      // All spun state - show placeholder, wheel shows "Full circle!" message
+      spinBtn.style.display = "";
       spinBtn.disabled = true;
-      spinBtn.textContent = "Done";
-      status.textContent = "Reset to spin again";
+      spinBtn.textContent = "Who's next?";
+      spinBtn.classList.add("steel-spin-btn-winner");
+      spinBtn.classList.add("steel-spin-btn-placeholder");
+      status.textContent = "";
+      if (this.wheel) {
+        this.wheel.setAllSpun(true);
+      }
     } else if (this.names.length === 0) {
-      spinBtn.disabled = true;
-      spinBtn.textContent = "Spin";
-      status.textContent = "No names - click Edit";
+      // Empty state - hide button
+      spinBtn.style.display = "none";
+      status.textContent = "Add some teammates to get started!";
+      if (this.wheel) {
+        this.wheel.setAllSpun(false);
+      }
     } else {
-      spinBtn.disabled = false;
-      spinBtn.textContent = "Spin";
-      status.textContent = `${this.activeNames.length}/${this.names.length}`;
+      // Normal state
+      spinBtn.classList.remove("steel-spin-btn-winner");
+      if (this.wheel) {
+        this.wheel.setAllSpun(false);
+      }
+
+      // Show winner name in button if there's a pending winner, otherwise show placeholder
+      spinBtn.style.display = "";
+      spinBtn.disabled = true;
+      if (this.lastWinner) {
+        spinBtn.textContent = this.lastWinner;
+        spinBtn.classList.add("steel-spin-btn-winner");
+        spinBtn.classList.remove("steel-spin-btn-placeholder");
+      } else {
+        spinBtn.textContent = "Who's next?";
+        spinBtn.classList.add("steel-spin-btn-winner");
+        spinBtn.classList.add("steel-spin-btn-placeholder");
+      }
+      status.textContent = "";
     }
   }
 
@@ -325,7 +325,7 @@ class SteelOverlay {
     namesList.innerHTML = this.names
       .map((name) => {
         const isActive = this.activeNames.includes(name);
-        return `<div class="steel-name-item ${isActive ? "" : "steel-name-disabled"}" data-name="${name}">${name}</div>`;
+        return `<div class="steel-name-item ${isActive ? "steel-name-active" : ""}" data-name="${name}">${name}</div>`;
       })
       .join("");
 
@@ -340,18 +340,18 @@ class SteelOverlay {
 
   async toggleName(item) {
     const name = item.dataset.name;
-    const isDisabled = item.classList.contains("steel-name-disabled");
+    const isActive = item.classList.contains("steel-name-active");
 
-    if (isDisabled) {
-      // Enable: add to activeNames
+    if (isActive) {
+      // Deactivate: remove from activeNames
+      this.activeNames = this.activeNames.filter((n) => n !== name);
+      item.classList.remove("steel-name-active");
+    } else {
+      // Activate: add to activeNames
       if (!this.activeNames.includes(name)) {
         this.activeNames.push(name);
       }
-      item.classList.remove("steel-name-disabled");
-    } else {
-      // Disable: remove from activeNames
-      this.activeNames = this.activeNames.filter((n) => n !== name);
-      item.classList.add("steel-name-disabled");
+      item.classList.add("steel-name-active");
     }
 
     await this.saveNames();
@@ -374,13 +374,11 @@ class SteelOverlay {
 
   async resetList() {
     this.activeNames = [...this.names];
-    this.lastWinner = null;
+    // Clear both pendingRemoval and lastWinner
     this.pendingRemoval = null;
-    const paletteLength = Math.min(
-      this.getPalette().length || 1,
-      this.names.length,
-    );
-    this.colorRotation = (this.colorRotation + 1) % (paletteLength || 1);
+    this.lastWinner = null;
+    const paletteLength = this.getPalette().length || 1;
+    this.colorRotation = (this.colorRotation + 1) % paletteLength;
     await this.saveNames();
 
     if (this.wheel) {
@@ -390,22 +388,9 @@ class SteelOverlay {
     }
 
     this.updateUI();
-    this.clearResult();
-  }
-
-  clearResult() {
-    const result = this.overlay.querySelector(".steel-result");
-    if (result) result.style.display = "none";
   }
 
   async handleSpinEnd(winner, index) {
-    // Show result
-    const result = this.overlay.querySelector(".steel-result");
-    const resultName = this.overlay.querySelector(".steel-result-name");
-
-    result.style.display = "block";
-    resultName.textContent = winner;
-
     // Save last winner and mark for pending removal (don't remove yet)
     this.lastWinner = winner;
     this.pendingRemoval = winner;
@@ -430,6 +415,7 @@ class SteelOverlay {
       (name) => name !== this.pendingRemoval,
     );
     this.pendingRemoval = null;
+    this.lastWinner = null; // Clear last winner when spinning again
     await this.saveNames();
 
     // Update wheel and clear highlight
