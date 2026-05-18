@@ -1,12 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Steel - Standup Wheel",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Make standups fun! Spin a colorful wheel to randomly pick team members on your Jira boards.",
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
+  "permissions": ["storage", "activeTab"],
   "host_permissions": [
     "*://*.atlassian.net/*",
     "*://*/jira/*",
@@ -29,9 +26,7 @@
         "content/overlay.js",
         "content/content.js"
       ],
-      "css": [
-        "content/content.css"
-      ],
+      "css": ["content/content.css"],
       "run_at": "document_idle"
     }
   ],
